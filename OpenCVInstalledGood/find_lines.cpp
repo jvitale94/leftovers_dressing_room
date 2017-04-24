@@ -22,9 +22,13 @@ CascadeClassifier face_cascade2;
 String face_cascade_name2 = "haarcascade_frontalface_alt.xml";
 
 std::vector<Point> detectFace(Mat frame);
-void findBody(std::vector<Point> face_points, Mat image, Mat image2);
+void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3);
 void blackOut(std::vector<Point> face_points, Mat image);
-void find_sleeve(Mat image, Mat image2, int point_x, int point_y, int slope_x, int slope_y, int x_trav);
+void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav);
+void change_Pixel(Mat image, Point point, int r, int g, int b);
+void print_pixels(Mat image);
+bool checkSlope(Mat image, int x, int y, int dir);
+
 
 void help()
 {
@@ -40,6 +44,7 @@ int find_lines(int argc, char** argv)
     
     Mat src = imread(filename, 0);
     Mat original = imread(filename, 1);
+    Mat original_feature_points_only = imread(filename, 1);
     
     if(src.empty())
     {
@@ -48,7 +53,7 @@ int find_lines(int argc, char** argv)
         return -1;
     }
 
-    GaussianBlur(src, src, Size( 5, 5 ), 0, 0 );
+    //GaussianBlur(src, src, Size( 5, 5 ), 0, 0 );
     
     Mat dst, cdst;
     
@@ -84,16 +89,25 @@ int find_lines(int argc, char** argv)
     std::vector<Point> face_points = detectFace(original);
     //iterate through pixels and find the right line below. scan to left and right to find shoulders
     
-    findBody(face_points, cdst, original);
+    findBody(face_points, cdst, original, original_feature_points_only);
     
-    imwrite( "testimages/detected_lines.jpg", cdst);
-    imwrite( "testimages/detected_src.jpg", original);
+    imwrite("lines_white.png", cdst);
+    imwrite("circles_white.png", original);
+    
+    std::string name = argv[2];
+    name = ""+name+".png";
+    
+    imwrite(name.c_str(), original_feature_points_only);
+    
+    //print_pixels(original_feature_points_only);
     
     resize(cdst, cdst, Size(cdst.cols/4, cdst.rows/4));
     resize(original, original, Size(original.cols/4, original.rows/4));
+    resize(original_feature_points_only, original_feature_points_only, Size(original_feature_points_only.cols/4, original_feature_points_only.rows/4));
     
     imshow("detected lines", cdst);
     imshow("face", original);
+    imshow("feature points only", original_feature_points_only);
     
     waitKey();
     
@@ -133,7 +147,7 @@ std::vector<Point> detectFace(Mat frame)
     return face_points;
 }
 
-void findBody(std::vector<Point> face_points, Mat image, Mat image2)
+void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
 {
     //find center
     Point center = face_points[0];
@@ -151,24 +165,34 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2)
             tracker = Point(center.x, i);
             circle(image, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
             circle(image2, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
+            
+            change_Pixel(image2, Point(center.x, i), 45, 5, 30);
+            change_Pixel(image3, Point(center.x, i), 45, 5, 30);
+            circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
+            
             break;
         }
     }
     
     //left sleeve
-    find_sleeve(image, image2, tracker.x-30, tracker.y+30, -1, 1, 1);
+    printf("Left Sleeve\n");
+    find_sleeve(image, image2, image3, tracker.x-700, tracker.y+700, 1, 1, 1);
     
     //right sleeve
-    find_sleeve(image, image2, tracker.x+30, tracker.y+30, 1, 1, -1);
+    printf("Right Sleeve\n");
+    find_sleeve(image, image2, image3, tracker.x+700, tracker.y+700, -1, 1, -1);
 
     //find waist line
-    for (int i = tracker.y+40; i < r; i++)
+    Point center_waist;
+    Point right_waist;
+    Point left_waist;
+    
+    for (int i = tracker.y+700; i < r; i++)
     {
         Vec3b color = image.at<Vec3b>(Point(tracker.x,i));
         if (color[2]>0)
         {
-            circle(image, Point(tracker.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
-            circle(image2, Point(tracker.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
+            center_waist = Point (tracker.x, i);
             break;
         }
         color[0] = 0;
@@ -176,6 +200,91 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2)
         color[2] = 0;
         image.at<Vec3b>(Point(tracker.x,i)) = color;
     }
+    
+    int slope = 0;
+    int threshold = 10;
+    int point_x = center_waist.x;
+    int point_y = center_waist.y;
+    
+    //right waist
+    while (slope-threshold<0)
+    {
+        //keeps looking for points consistent with already found slope
+        for (int i = -5; i<5; i++)
+        {
+            Vec3b color = image.at<Vec3b>(Point(point_x+1,point_y+i));
+            if (color[2]>0)
+            {
+                point_x = point_x + 1;
+                point_y = point_y+i;
+                slope = i;
+                color[0] = 0;
+                color[1] = 255;
+                color[2] = 0;
+                image.at<Vec3b>(Point(point_x, point_y)) = color;
+                //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
+                break;
+            }
+            if (i==4)
+            {
+                slope = 11;
+            }
+        }
+    }
+    
+    right_waist = Point(point_x, point_y);
+    
+    point_x = center_waist.x;
+    point_y = center_waist.y;
+    slope = 0;
+    
+    //left waist
+    while (slope-threshold<0)
+    {
+        
+        //keeps looking for points consistent with already found slope
+        for (int i = -5; i<5; i++)
+        {
+            Vec3b color = image.at<Vec3b>(Point(point_x - 1,point_y+i));
+            if (color[2]>0)
+            {
+                point_x = point_x - 1;
+                point_y = point_y+i;
+                slope = i;
+                color[0] = 0;
+                color[1] = 255;
+                color[2] = 0;
+                image.at<Vec3b>(Point(point_x, point_y)) = color;
+                //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
+                break;
+            }
+            if (i==4)
+            {
+                slope = 11;
+            }
+        }
+    }
+    
+    left_waist = Point(point_x, point_y);
+    
+    circle(image, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image2, center_waist, 45, 5, 30);
+    change_Pixel(image3, center_waist, 45, 5, 30);
+    circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    
+    circle(image, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image2, right_waist, 45, 5, 30);
+    change_Pixel(image3, right_waist, 45, 5, 30);
+    circle(image3, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    
+    circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image2, left_waist, 45, 5, 30);
+    change_Pixel(image3, left_waist, 45, 5, 30);
+    circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+
 }
 
 void blackOut(std::vector<Point> face_points, Mat image)
@@ -198,28 +307,35 @@ void blackOut(std::vector<Point> face_points, Mat image)
     }
 }
 
-void find_sleeve(Mat image, Mat image2, int point_x, int point_y, int slope_x, int slope_y, int x_trav)
+void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav)
 {
     //Finds sleeve
-    while (point_x>0)
+    while (point_x>0 && point_x<image.cols)
     {
         Vec3b color = image.at<Vec3b>(Point(point_x,point_y));
         if (color[2]>0)
         {
+            circle(image2, Point(point_x,point_y), 20, Scalar(0, 0, 255), 2, 8, 0);
+            bool goodpoint = checkSlope(image, point_x, point_y, x_trav);
+            printf("good point is: %d\n", goodpoint);
+            if (goodpoint)
+            {
+                break;
+            }
             //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
-            break;
         }
         //draws green line from neckline to sleeve
         color[0] = 0;
         color[1] = 255;
         color[2] = 0;
         image.at<Vec3b>(Point(point_x,point_y)) = color;
-        point_x = point_x + slope_x;
+        point_x = point_x - slope_x;
         point_y = point_y + slope_y;
     }
     
     //Slope stores slope of sleeve
     int slope = 0;
+    int finalslope = 0;
     //Draw the points traced on sleeve in green
     std::vector<Point> colorpoints;
     colorpoints.push_back(Point(point_x, point_y));
@@ -227,7 +343,7 @@ void find_sleeve(Mat image, Mat image2, int point_x, int point_y, int slope_x, i
     //Find the first point on sleeve next to found point, assuming it is below
     for (int i = 0; i<50; i++)
     {
-        Vec3b color = image.at<Vec3b>(Point(point_x+1,point_y+i));
+        Vec3b color = image.at<Vec3b>(Point(point_x+x_trav,point_y+i));
         if (color[2]>0)
         {
             point_x = point_x + x_trav;
@@ -240,19 +356,28 @@ void find_sleeve(Mat image, Mat image2, int point_x, int point_y, int slope_x, i
     }
     
     int threshold = 6;
+    Point inside_corner;
+    Point outside_corner;
     
+    //find inside corner of sleeve
     while (slope-threshold<0)
     {
         //keeps looking for points consistent with already found slope
         for (int i = -5; i<5; i++)
         {
-            Vec3b color = image.at<Vec3b>(Point(point_x+1,point_y+i));
+            Vec3b color = image.at<Vec3b>(Point(point_x+x_trav,point_y+i));
             if (color[2]>0)
             {
                 point_x = point_x + x_trav;
                 point_y = point_y+i;
                 colorpoints.push_back(Point(point_x, point_y));
                 slope = i;
+                finalslope = i;
+                //printf("Slope is: %d\n", slope);
+                if (slope<-1)
+                {
+                    slope = 7;
+                }
                 //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
                 break;
             }
@@ -263,23 +388,115 @@ void find_sleeve(Mat image, Mat image2, int point_x, int point_y, int slope_x, i
         }
     }
     
+    inside_corner = Point(point_x, point_y);
+    
     //draw green points of sleeve
     for (Point p : colorpoints)
     {
-        Vec3b color = image.at<Vec3b>(p);
+        change_Pixel(image2, p, 0, 255, 0);
+    }
+    
+    colorpoints.clear();
+    slope = finalslope;
+
+    //find outside corner of sleeve
+    while (slope-threshold<0)
+    {
+        //keeps looking for points consistent with already found slope
+        for (int i = -5; i<10; i++)
+        {
+            Vec3b color = image.at<Vec3b>(Point(point_x-x_trav,point_y+i));
+            if (color[2]>0)
+            {
+                point_x = point_x - x_trav;
+                point_y = point_y+i;
+                colorpoints.push_back(Point(point_x, point_y));
+                slope = i;
+                //printf("Slope is: %d\n", slope);
+                if (slope<-4)
+                {
+                    printf("Here 1\n");
+                    slope = 7;
+                }
+                //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
+                break;
+            }
+            if (i==4)
+            {
+                printf("Here 2\n");
+                slope = 7;
+            }
+        }
+    }
+    
+    for (Point p : colorpoints)
+    {
+        change_Pixel(image2, p, 0, 255, 0);
+    }
+    
+    outside_corner = Point(point_x, point_y);
+    
+    printf("outside corner is: %d, %d\n", point_x, point_y);
+    
+    circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image2, inside_corner, 45, 5, 30);
+    change_Pixel(image3, inside_corner, 45, 5, 30);
+    
+    circle(image, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image2, outside_corner, 45, 5, 30);
+    change_Pixel(image3, outside_corner, 45, 5, 30);
+    
+}
+
+void change_Pixel(Mat image, Point point, int r, int g, int b)
+{
+    Vec3b color = image.at<Vec3b>(point);
+    color[0] = b;
+    color[1] = g;
+    color[2] = r;
+    image.at<Vec3b>(point) = color;
+}
+
+void print_pixels(Mat image)
+{
+    for (int i = 0; i<image.rows; i++)
+    {
+        for (int j = 0; j<image.cols; j++)
+        {
+            Vec3b color1 = image.at<Vec3b>(Point(i,j));
+            printf("Pixel in image at point (%d, %d) is (%d, %d, %d)\n", i, j, color1[2], color1[1], color1[0]);
+        }
+    }
+}
+
+bool checkSlope(Mat image, int x, int y, int dir)
+{
+    int slope = 0;
+    
+    for (int i = 0; i<20; i++)
+    {
+        Vec3b color = image.at<Vec3b>(Point(x+10*dir-i, y+10));
+        if (color[2]>0)
+        {
+            slope = i;
+            //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
+            break;
+        }
         color[0] = 0;
         color[1] = 255;
         color[2] = 0;
-        image.at<Vec3b>(p) = color;
+        image.at<Vec3b>(Point(x,y)) = color;
     }
     
-    //Draw corners of sleeve on both images
-    circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image2, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
-    
-
+    //printf("Check slope is: %d\n", slope);
+    if (slope==0)
+        return true;
+    return false;
 }
-
 
 
 

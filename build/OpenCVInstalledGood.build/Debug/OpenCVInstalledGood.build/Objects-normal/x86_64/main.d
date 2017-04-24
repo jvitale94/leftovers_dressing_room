@@ -134,4 +134,8 @@ dependencies: \
   /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/tonemap.hpp \
   /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/find_lines.hpp \
   /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/find_logo.hpp \
-  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/find_circle.hpp
+  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/find_circle.hpp \
+  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/extract_shirt.hpp \
+  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/match_shirts.hpp \
+  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/detect_feats.hpp \
+  /Users/jakevitale/Documents/CompSci/OpenCVInstalledGood/OpenCVInstalledGood/find_lines_black.hpp

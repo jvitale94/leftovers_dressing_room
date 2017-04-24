@@ -19,13 +19,13 @@
 using namespace cv;
 using namespace cv::xfeatures2d;
 
-void readme();
+void readme2();
 
 /** @function main */
 int find_features( int argc, char** argv )
 {
     if( argc != 3 )
-    { readme(); return -1; }
+    { readme2(); return -1; }
     
     Mat img_1 = imread( argv[1], IMREAD_GRAYSCALE );
     Mat img_2 = imread( argv[2], IMREAD_GRAYSCALE );
@@ -62,5 +62,5 @@ int find_features( int argc, char** argv )
 }
 
 /** @function readme */
-void readme()
+void readme2()
 { std::cout << " Usage: ./SURF_detector <img1> <img2>" << std::endl; }

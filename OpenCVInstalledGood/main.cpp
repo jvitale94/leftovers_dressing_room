@@ -19,6 +19,10 @@
 #include "find_lines.hpp"
 #include "find_logo.hpp"
 #include "find_circle.hpp"
+#include "extract_shirt.hpp"
+#include "match_shirts.hpp"
+#include "detect_feats.hpp"
+#include "find_lines_black.hpp"
 
 using namespace cv;
 using namespace cv::xfeatures2d;
@@ -28,9 +32,12 @@ void readme();
 //* @function main 
 int main( int argc, char** argv )
 {
-    
+    //detect_feats(argc, argv);
+    //extract_shirt(argc, argv);
+    //find_lines(argc, argv);
+    find_lines_black(argc, argv);
+    //match_shirt(argc, argv);
     //find_logo(argc, argv);
-    find_lines(argc, argv);
     //find_circle(argc, argv);
     //tone(argc, argv);
     //face();

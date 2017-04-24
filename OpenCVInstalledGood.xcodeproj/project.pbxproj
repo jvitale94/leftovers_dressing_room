@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D32353B1EA66D5700D1CE89 /* extract_shirt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D3235391EA66D5700D1CE89 /* extract_shirt.cpp */; };
+		2D32353E1EA7C0AE00D1CE89 /* match_shirts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D32353C1EA7C0AE00D1CE89 /* match_shirts.cpp */; };
+		2D3235411EA8561500D1CE89 /* detect_feats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D32353F1EA8561500D1CE89 /* detect_feats.cpp */; };
+		2D3235441EA9898C00D1CE89 /* find_lines_black.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D3235421EA9898C00D1CE89 /* find_lines_black.cpp */; };
 		2D34B63F1E9D3A7400EE1E65 /* load_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D34B63D1E9D3A7400EE1E65 /* load_image.cpp */; };
 		2D34B6451E9D3CA700EE1E65 /* find_features.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D34B6431E9D3CA700EE1E65 /* find_features.cpp */; };
 		2D34B6481E9D3F2A00EE1E65 /* blend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D34B6461E9D3F2A00EE1E65 /* blend.cpp */; };
@@ -37,6 +41,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2D3235391EA66D5700D1CE89 /* extract_shirt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extract_shirt.cpp; sourceTree = "<group>"; };
+		2D32353A1EA66D5700D1CE89 /* extract_shirt.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = extract_shirt.hpp; sourceTree = "<group>"; };
+		2D32353C1EA7C0AE00D1CE89 /* match_shirts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = match_shirts.cpp; sourceTree = "<group>"; };
+		2D32353D1EA7C0AE00D1CE89 /* match_shirts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = match_shirts.hpp; sourceTree = "<group>"; };
+		2D32353F1EA8561500D1CE89 /* detect_feats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detect_feats.cpp; sourceTree = "<group>"; };
+		2D3235401EA8561500D1CE89 /* detect_feats.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = detect_feats.hpp; sourceTree = "<group>"; };
+		2D3235421EA9898C00D1CE89 /* find_lines_black.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = find_lines_black.cpp; sourceTree = "<group>"; };
+		2D3235431EA9898C00D1CE89 /* find_lines_black.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = find_lines_black.hpp; sourceTree = "<group>"; };
 		2D34B63D1E9D3A7400EE1E65 /* load_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = load_image.cpp; path = OpenCVInstalledGood/load_image.cpp; sourceTree = "<group>"; };
 		2D34B63E1E9D3A7400EE1E65 /* load_image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = load_image.hpp; path = OpenCVInstalledGood/load_image.hpp; sourceTree = "<group>"; };
 		2D34B6431E9D3CA700EE1E65 /* find_features.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = find_features.cpp; path = OpenCVInstalledGood/find_features.cpp; sourceTree = "<group>"; };
@@ -108,6 +120,14 @@
 				2D34B6681E9FD69200EE1E65 /* find_circle.hpp */,
 				2D34B6521E9DA7DE00EE1E65 /* blur_stuff.cpp */,
 				2D34B6611E9EA32300EE1E65 /* find_lines.cpp */,
+				2D3235421EA9898C00D1CE89 /* find_lines_black.cpp */,
+				2D3235431EA9898C00D1CE89 /* find_lines_black.hpp */,
+				2D32353C1EA7C0AE00D1CE89 /* match_shirts.cpp */,
+				2D32353F1EA8561500D1CE89 /* detect_feats.cpp */,
+				2D3235401EA8561500D1CE89 /* detect_feats.hpp */,
+				2D32353D1EA7C0AE00D1CE89 /* match_shirts.hpp */,
+				2D3235391EA66D5700D1CE89 /* extract_shirt.cpp */,
+				2D32353A1EA66D5700D1CE89 /* extract_shirt.hpp */,
 				2D34B6641E9EAC9D00EE1E65 /* find_logo.cpp */,
 				2D34B6651E9EAC9D00EE1E65 /* find_logo.hpp */,
 				2D34B6621E9EA32300EE1E65 /* find_lines.hpp */,
@@ -191,15 +211,19 @@
 			files = (
 				2D34B6631E9EA32300EE1E65 /* find_lines.cpp in Sources */,
 				2D62BCD21E9BE58B0093B363 /* main.cpp in Sources */,
+				2D3235411EA8561500D1CE89 /* detect_feats.cpp in Sources */,
 				2D34B6571E9DACD600EE1E65 /* erode_dilute.cpp in Sources */,
 				2D34B6451E9D3CA700EE1E65 /* find_features.cpp in Sources */,
 				2D34B6691E9FD69200EE1E65 /* find_circle.cpp in Sources */,
 				2D34B65D1E9DC29F00EE1E65 /* face.cpp in Sources */,
+				2D32353B1EA66D5700D1CE89 /* extract_shirt.cpp in Sources */,
 				2D34B6661E9EAC9D00EE1E65 /* find_logo.cpp in Sources */,
+				2D3235441EA9898C00D1CE89 /* find_lines_black.cpp in Sources */,
 				2D34B6601E9DC6E800EE1E65 /* tonemap.cpp in Sources */,
 				2D34B63F1E9D3A7400EE1E65 /* load_image.cpp in Sources */,
 				2D34B6541E9DA7DE00EE1E65 /* blur_stuff.cpp in Sources */,
 				2D34B6481E9D3F2A00EE1E65 /* blend.cpp in Sources */,
+				2D32353E1EA7C0AE00D1CE89 /* match_shirts.cpp in Sources */,
 				2D34B6511E9DA1E800EE1E65 /* fourier.cpp in Sources */,
 				2D34B64E1E9D9F9400EE1E65 /* draw_stuff.cpp in Sources */,
 				2D34B65A1E9DB51000EE1E65 /* morph.cpp in Sources */,
