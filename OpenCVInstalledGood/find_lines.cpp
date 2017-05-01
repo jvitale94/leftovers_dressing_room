@@ -91,13 +91,15 @@ int find_lines(int argc, char** argv)
     
     findBody(face_points, cdst, original, original_feature_points_only);
     
-    imwrite("lines_white.png", cdst);
-    imwrite("circles_white.png", original);
-    
     std::string name = argv[2];
-    name = ""+name+".png";
     
-    imwrite(name.c_str(), original_feature_points_only);
+    std::string name1 = ""+name+"_lines.png";
+    std::string name2 = ""+name+"_circles.png";
+    std::string name3 = ""+name+"_just_feature_points.png";
+    
+    imwrite(name1.c_str(), cdst);
+    imwrite(name2.c_str(), original);
+    imwrite(name3.c_str(), original_feature_points_only);
     
     //print_pixels(original_feature_points_only);
     
@@ -151,6 +153,11 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
 {
     //find center
     Point center = face_points[0];
+    
+    
+    //center of face is feature point
+    change_Pixel(image3, center, 45, 5, 30);
+    
     int r = image.rows;
     blackOut(face_points, image);
     Point tracker;
@@ -168,7 +175,7 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
             
             change_Pixel(image2, Point(center.x, i), 45, 5, 30);
             change_Pixel(image3, Point(center.x, i), 45, 5, 30);
-            circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
+            //circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
             
             break;
         }
@@ -176,11 +183,11 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     
     //left sleeve
     printf("Left Sleeve\n");
-    find_sleeve(image, image2, image3, tracker.x-700, tracker.y+700, 1, 1, 1);
+    find_sleeve(image, image2, image3, tracker.x-500, tracker.y+500, 1, 1, 1);
     
     //right sleeve
     printf("Right Sleeve\n");
-    find_sleeve(image, image2, image3, tracker.x+700, tracker.y+700, -1, 1, -1);
+    find_sleeve(image, image2, image3, tracker.x+500, tracker.y+500, -1, 1, -1);
 
     //find waist line
     Point center_waist;
@@ -271,19 +278,19 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     circle(image2, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image2, center_waist, 45, 5, 30);
     change_Pixel(image3, center_waist, 45, 5, 30);
-    circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     circle(image, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image2, right_waist, 45, 5, 30);
     change_Pixel(image3, right_waist, 45, 5, 30);
-    circle(image3, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image2, left_waist, 45, 5, 30);
     change_Pixel(image3, left_waist, 45, 5, 30);
-    circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
 
 }
 
@@ -316,8 +323,9 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
         if (color[2]>0)
         {
             circle(image2, Point(point_x,point_y), 20, Scalar(0, 0, 255), 2, 8, 0);
+            
+            //if bad point, black out surrounding pixels
             bool goodpoint = checkSlope(image, point_x, point_y, x_trav);
-            printf("good point is: %d\n", goodpoint);
             if (goodpoint)
             {
                 break;
@@ -415,7 +423,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
                 //printf("Slope is: %d\n", slope);
                 if (slope<-4)
                 {
-                    printf("Here 1\n");
+                    //printf("Here 1\n");
                     slope = 7;
                 }
                 //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -423,7 +431,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
             }
             if (i==4)
             {
-                printf("Here 2\n");
+                //printf("Here 2\n");
                 slope = 7;
             }
         }
@@ -436,17 +444,17 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     
     outside_corner = Point(point_x, point_y);
     
-    printf("outside corner is: %d, %d\n", point_x, point_y);
+    //printf("outside corner is: %d, %d\n", point_x, point_y);
     
     circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image2, inside_corner, 45, 5, 30);
     change_Pixel(image3, inside_corner, 45, 5, 30);
     
     circle(image, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image2, outside_corner, 45, 5, 30);
     change_Pixel(image3, outside_corner, 45, 5, 30);
     
