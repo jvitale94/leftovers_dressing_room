@@ -34,7 +34,7 @@ String face_cascade_name3 = "haarcascade_frontalface_alt.xml";
 std::vector<Point> detectFaceb(Mat frame);
 void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3);
 void blackOutb(std::vector<Point> face_points, Mat image);
-void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav, int leftorright);
+void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav, int leftorright, int featsmod);
 void change_Pixelb(Mat image, Point point, int r, int g, int b);
 void print_pixelsb(Mat image);
 bool checkSlopeb(Mat image, int x, int y, int dir);
@@ -101,13 +101,15 @@ int find_lines_black(int argc, char** argv)
     
     findBodyb(face_points, cdst, original, original_feature_points_only);
     
-    imwrite("lines_black.png", cdst);
-    imwrite("circles_black.png", original);
-    
     std::string name = argv[2];
-    name = ""+name+".png";
     
-    imwrite(name.c_str(), original_feature_points_only);
+    std::string name1 = ""+name+"_lines.png";
+    std::string name2 = ""+name+"_circles.png";
+    std::string name3 = ""+name+"_just_feature_points.png";
+    
+    imwrite(name1.c_str(), cdst);
+    imwrite(name2.c_str(), original);
+    imwrite(name3.c_str(), original_feature_points_only);
     
     //print_pixels(original_feature_points_only);
     
@@ -115,11 +117,11 @@ int find_lines_black(int argc, char** argv)
     resize(original, original, Size(original.cols/4, original.rows/4));
     resize(original_feature_points_only, original_feature_points_only, Size(original_feature_points_only.cols/4, original_feature_points_only.rows/4));
     
-    imshow("detected lines", cdst);
-    imshow("face", original);
-    imshow("feature points only", original_feature_points_only);
-    
-    waitKey();
+//    imshow("detected lines", cdst);
+//    imshow("face", original);
+//    imshow("feature points only", original_feature_points_only);
+//    
+//    waitKey();
     
     return 0;
 }
@@ -161,6 +163,9 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
 {
     //find center
     Point center = face_points[0];
+    
+    change_Pixelb(image3, center, 45, 5, 30);
+    
     int r = image.rows;
     blackOutb(face_points, image);
     Point tracker;
@@ -178,7 +183,7 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
             
             change_Pixelb(image2, Point(center.x, i), 45, 5, 30);
             change_Pixelb(image3, Point(center.x, i), 45, 5, 30);
-            circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
+            //circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
             
             break;
         }
@@ -186,11 +191,11 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
     
     //left sleeve
     printf("Left Sleeve\n");
-    find_sleeveb(image, image2, image3, tracker.x-650, tracker.y+650, 1, 1, 1, 0);
+    find_sleeveb(image, image2, image3, tracker.x-650, tracker.y+650, 1, 1, 1, 0, 8);
     
     //right sleeve
     printf("Right Sleeve\n");
-    find_sleeveb(image, image2, image3, tracker.x+650, tracker.y+650, -1, 1, -1, 1);
+    find_sleeveb(image, image2, image3, tracker.x+650, tracker.y+650, -1, 1, -1, 1, 12);
     
     //find waist line
     Point center_waist;
@@ -289,18 +294,302 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
     //    change_Pixel(image3, right_waist, 45, 5, 30);
     //    circle(image3, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
+    
+    
     circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixelb(image2, left_waist, 45, 5, 30);
     change_Pixelb(image3, left_waist, 45, 5, 30);
-    circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
-    printf("%d, %d\n", point_x, point_y);
+    //circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
-    circle(image3, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+    printf("%d, %d\n", left_waist.x, left_waist.y);
+    
+    //circle(image3, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixelb(image2, Point(2221, 3428), 45, 5, 30);
     change_Pixelb(image3, Point(2221, 3428), 45, 5, 30);
     
-    circle(image3, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+    circle(image2, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixelb(image2, Point(890, 3400), 45, 5, 30);
     change_Pixelb(image3, Point(890, 3400), 45, 5, 30);
+    
+    int y = 3400;
+    int point_count = 0;
+    int point_mod = 0;
+    
+    for (int x = 890; x<=2221; x++)
+    {
+        if (point_mod % 20 == 0)
+        {
+            point_mod = 0;
+            point_count++;
+            
+            circle(image2, Point(x, y), 20, Scalar(255, 0, 255), 2, 8, 0);
+            change_Pixelb(image2, Point(x, y), 45, 5, 30);
+            change_Pixelb(image3, Point(x, y), 45, 5, 30);
+        }
+        
+        if (point_count == 1 and point_mod == 0)
+        {
+            y = y+35;
+        }
+        
+        else if (point_count == 2 and point_mod == 0)
+        {
+            y = y+18;
+        }
+        
+        else if (point_count == 3 and point_mod == 0)
+        {
+            y = y+18;
+        }
+        
+        else if (point_count == 4 and point_mod == 0)
+        {
+            y = y+16;
+        }
+        
+        else if (point_count == 5 and point_mod == 0)
+        {
+            y = y+14;
+        }
+        
+        else if (point_count == 6 and point_mod == 0)
+        {
+            y = y+10;
+        }
+        
+        else if (point_count == 7 and point_mod == 0)
+        {
+            y = y+8;
+        }
+        
+        else if (point_count == 8 and point_mod == 0)
+        {
+            y = y+8;
+        }
+        else if (point_count == 9 and point_mod == 0)
+        {
+            y = y+7;
+        }
+        
+        else if (point_count == 10 and point_mod == 0)
+        {
+            y = y+6;
+        }
+        
+        else if (point_count == 11 and point_mod == 0)
+        {
+            y = y+5;
+        }
+        
+        else if (point_count == 12 and point_mod == 0)
+        {
+            y = y+5;
+        }
+        
+        else if (point_count == 13 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        
+        else if (point_count == 14 and point_mod == 0)
+        {
+            y = y+4;
+        }
+        else if (point_count == 15 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 16 and point_mod == 0)
+        {
+            y = y+4;
+        }
+        else if (point_count == 17 and point_mod == 0)
+        {
+            y = y+4;
+        }
+        else if (point_count == 18 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 19 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 20 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 21 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 22 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 23 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 24 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 25 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 26 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 27 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 28 and point_mod == 0)
+        {
+            y = y+3;
+        }
+        else if (point_count == 29 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 30 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 31 and point_mod == 0)
+        {
+            y = y+1;
+        }
+        else if (point_count == 32 and point_mod == 0)
+        {
+            y = y+1;
+        }
+        else if (point_count == 33 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 34 and point_mod == 0)
+        {
+            y = y+2;
+        }
+        else if (point_count == 42 and point_mod == 0)
+        {
+            y = y-1;
+        }
+        else if (point_count == 43 and point_mod == 0)
+        {
+            y = y-1;
+        }
+        else if (point_count == 44 and point_mod == 0)
+        {
+            y = y-2;
+        }
+        else if (point_count == 45 and point_mod == 0)
+        {
+            y = y-2;
+        }
+        else if (point_count == 46 and point_mod == 0)
+        {
+            y = y-2;
+        }
+        else if (point_count == 47 and point_mod == 0)
+        {
+            y = y-3;
+        }
+        else if (point_count == 48 and point_mod == 0)
+        {
+            y = y-3;
+        }
+        else if (point_count == 49 and point_mod == 0)
+        {
+            y = y-3;
+        }
+        else if (point_count == 50 and point_mod == 0)
+        {
+            y = y-7;
+        }
+        else if (point_count == 51 and point_mod == 0)
+        {
+            y = y-5;
+        }
+        else if (point_count == 52 and point_mod == 0)
+        {
+            y = y-4;
+        }
+        else if (point_count == 53 and point_mod == 0)
+        {
+            y = y-5;
+        }
+        
+        else if (point_count == 54 and point_mod == 0)
+        {
+            y = y-5;
+        }
+        else if (point_count == 55 and point_mod == 0)
+        {
+            y = y-6;
+        }
+        else if (point_count == 56 and point_mod == 0)
+        {
+            y = y-10;
+        }
+        else if (point_count == 57 and point_mod == 0)
+        {
+            y = y-11;
+        }
+        
+        
+        else if (point_count == 58 and point_mod == 0)
+        {
+            y = y-11;
+        }
+        else if (point_count == 59 and point_mod == 0)
+        {
+            y = y-7;
+        }
+        else if (point_count == 60 and point_mod == 0)
+        {
+            y = y-7;
+        }
+        
+        else if (point_count == 61 and point_mod == 0)
+        {
+            y = y-8;
+        }
+        else if (point_count == 62 and point_mod == 0)
+        {
+            y = y-10;
+        }
+        else if (point_count == 63 and point_mod == 0)
+        {
+            y = y-11;
+        }
+        
+        else if (point_count == 64 and point_mod == 0)
+        {
+            y = y-12;
+        }
+        else if (point_count == 65 and point_mod == 0)
+        {
+            y = y-11;
+        }
+        else if (point_count == 66 and point_mod == 0)
+        {
+            y = y-14;
+        }
+        
+        point_mod++;
+    }
+    
+    printf("Points on waist line: %d\n", point_count);
 }
 
 void blackOutb(std::vector<Point> face_points, Mat image)
@@ -323,7 +612,7 @@ void blackOutb(std::vector<Point> face_points, Mat image)
     }
 }
 
-void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav, int leftorright)
+void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, int slope_x, int slope_y, int x_trav, int leftorright, int featsmod)
 {
     //Finds sleeve
     while (point_x>0 && point_x<image.cols)
@@ -406,9 +695,20 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     
     inside_corner = Point(point_x, point_y);
     
+    int count = 0;
+    int feat_count = 0;
+    
     //draw green points of sleeve
     for (Point p : colorpoints)
     {
+        if (count % featsmod==0)
+        {
+            feat_count++;
+            change_Pixelb(image3, p, 45, 5, 30);
+            circle(image2, p, 20, Scalar(255, 0, 255), 2, 8, 0);
+            
+        }
+        count++;
         change_Pixelb(image2, p, 0, 255, 0);
     }
     
@@ -442,7 +742,7 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
                 //printf("Slope is: %d\n", slope);
                 if (slope<-4)
                 {
-                    printf("Here 1\n");
+                    //printf("Here 1\n");
                     slope = 7;
                 }
                 //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -450,7 +750,7 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
             }
             if (i==4)
             {
-                printf("Here 2\n");
+                //printf("Here 2\n");
                 slope = 7;
             }
         }
@@ -458,24 +758,31 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     
     for (Point p : colorpoints)
     {
+        if (count%featsmod==0)
+        {
+            feat_count++;
+            change_Pixelb(image3, p, 45, 5, 30);
+            circle(image2, p, 20, Scalar(255, 0, 255), 2, 8, 0);
+        }
+        count++;
         change_Pixelb(image2, p, 0, 255, 0);
     }
     
     outside_corner = Point(point_x, point_y);
     
-    printf("outside corner is: %d, %d\n", point_x, point_y);
-    
     circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixelb(image2, inside_corner, 45, 5, 30);
     change_Pixelb(image3, inside_corner, 45, 5, 30);
     
     circle(image, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    //circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixelb(image2, outside_corner, 45, 5, 30);
     change_Pixelb(image3, outside_corner, 45, 5, 30);
+    
+    printf("feat count is %d\n", feat_count);
     
 }
 

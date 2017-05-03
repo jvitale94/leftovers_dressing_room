@@ -75,6 +75,7 @@ void print_pixelss(Mat image)
 
 std::vector<Point2f> find_pixels_vals(Mat image, int r, int g, int b)
 {
+    int count = 0;
     std::vector<Point2f> points;
     
     for (int i = 0; i<image.rows; i++)
@@ -84,11 +85,13 @@ std::vector<Point2f> find_pixels_vals(Mat image, int r, int g, int b)
             Vec3b color = image.at<Vec3b>(Point(i,j));
             if (color[2]==r and color[1]==g and color[0]==b)
             {
+                count ++;
                 //printf("Pixel in image at point (%d, %d) is (%d, %d, %d)\n", i, j, color[2], color[1], color[0]);
                 points.push_back(Point2f(i,j));
             }
         }
     }
+    printf("There are %d pixels with the given RGB vals\n", count);
     return points;
 }
 

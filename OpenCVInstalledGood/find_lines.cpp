@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <math.h>
 
 using namespace cv;
 using namespace std;
@@ -103,15 +104,15 @@ int find_lines(int argc, char** argv)
     
     //print_pixels(original_feature_points_only);
     
-    resize(cdst, cdst, Size(cdst.cols/4, cdst.rows/4));
-    resize(original, original, Size(original.cols/4, original.rows/4));
-    resize(original_feature_points_only, original_feature_points_only, Size(original_feature_points_only.cols/4, original_feature_points_only.rows/4));
-    
-    imshow("detected lines", cdst);
-    imshow("face", original);
-    imshow("feature points only", original_feature_points_only);
-    
-    waitKey();
+//    resize(cdst, cdst, Size(cdst.cols/4, cdst.rows/4));
+//    resize(original, original, Size(original.cols/4, original.rows/4));
+//    resize(original_feature_points_only, original_feature_points_only, Size(original_feature_points_only.cols/4, original_feature_points_only.rows/4));
+//    
+//    imshow("detected lines", cdst);
+//    imshow("face", original);
+//    imshow("feature points only", original_feature_points_only);
+//    
+//    waitKey();
     
     return 0;
 }
@@ -157,6 +158,8 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     
     //center of face is feature point
     change_Pixel(image3, center, 45, 5, 30);
+    change_Pixel(image2, center, 45, 5, 30);
+
     
     int r = image.rows;
     blackOut(face_points, image);
@@ -173,6 +176,7 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
             circle(image, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
             circle(image2, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
             
+            change_Pixel(image, Point(center.x, i), 45, 5, 30);
             change_Pixel(image2, Point(center.x, i), 45, 5, 30);
             change_Pixel(image3, Point(center.x, i), 45, 5, 30);
             //circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -186,7 +190,7 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     find_sleeve(image, image2, image3, tracker.x-500, tracker.y+500, 1, 1, 1);
     
     //right sleeve
-    printf("Right Sleeve\n");
+    printf("\n\nRight Sleeve\n");
     find_sleeve(image, image2, image3, tracker.x+500, tracker.y+500, -1, 1, -1);
 
     //find waist line
@@ -212,6 +216,8 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     int threshold = 10;
     int point_x = center_waist.x;
     int point_y = center_waist.y;
+    
+    int count_feats = 0;
     
     //right waist
     while (slope-threshold<0)
@@ -276,18 +282,21 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     
     circle(image, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image, center_waist, 45, 5, 30);
     change_Pixel(image2, center_waist, 45, 5, 30);
     change_Pixel(image3, center_waist, 45, 5, 30);
     //circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     circle(image, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image, right_waist, 45, 5, 30);
     change_Pixel(image2, right_waist, 45, 5, 30);
     change_Pixel(image3, right_waist, 45, 5, 30);
     //circle(image3, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image, left_waist, 45, 5, 30);
     change_Pixel(image2, left_waist, 45, 5, 30);
     change_Pixel(image3, left_waist, 45, 5, 30);
     //circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -322,9 +331,9 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
         Vec3b color = image.at<Vec3b>(Point(point_x,point_y));
         if (color[2]>0)
         {
-            circle(image2, Point(point_x,point_y), 20, Scalar(0, 0, 255), 2, 8, 0);
+            //circle(image2, Point(point_x,point_y), 20, Scalar(0, 0, 255), 2, 8, 0);
             
-            //if bad point, black out surrounding pixels
+            //****if bad point, black out surrounding pixels*** <---- idea for later???
             bool goodpoint = checkSlope(image, point_x, point_y, x_trav);
             if (goodpoint)
             {
@@ -345,6 +354,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     int slope = 0;
     int finalslope = 0;
     //Draw the points traced on sleeve in green
+    
     std::vector<Point> colorpoints;
     colorpoints.push_back(Point(point_x, point_y));
     
@@ -363,7 +373,9 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
         }
     }
     
-    int threshold = 6;
+    printf("Slope is %d\n", slope);
+    
+    int threshold = 3;
     Point inside_corner;
     Point outside_corner;
     
@@ -371,7 +383,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     while (slope-threshold<0)
     {
         //keeps looking for points consistent with already found slope
-        for (int i = -5; i<5; i++)
+        for (int i = -3; i<4; i++)
         {
             Vec3b color = image.at<Vec3b>(Point(point_x+x_trav,point_y+i));
             if (color[2]>0)
@@ -389,7 +401,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
                 //circle(image, Point(point_x,point_y), 20, Scalar(255, 0, 0), 2, 8, 0);
                 break;
             }
-            if (i==4)
+            if (i==3)
             {
                 slope = 7;
             }
@@ -399,19 +411,31 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     inside_corner = Point(point_x, point_y);
     
     //draw green points of sleeve
-    for (Point p : colorpoints)
-    {
-        change_Pixel(image2, p, 0, 255, 0);
-    }
+//    for (Point p : colorpoints)
+//    {
+//        if (feat_mod % 15 == 0)
+//        {
+//            feat_mod = 0;
+//            count_feats++;
+//            change_Pixel(image3, p, 45, 5, 30);
+//            circle(image2, p, 20, Scalar(255, 150, 1*10*count_feats), 2, 8, 0);
+//        }
+//        feat_mod++;
+//        change_Pixel(image2, p, 0, 255, 0);
+//    }
     
     colorpoints.clear();
+    colorpoints.push_back(inside_corner);
     slope = finalslope;
+//    point_x = original.x; //original was the first point found on the sleeve, unnecessary now that we
+                            //can trace the color points from one corner
+//    point_y = original.y;
 
     //find outside corner of sleeve
     while (slope-threshold<0)
     {
         //keeps looking for points consistent with already found slope
-        for (int i = -5; i<10; i++)
+        for (int i = -5; i<5; i++)
         {
             Vec3b color = image.at<Vec3b>(Point(point_x-x_trav,point_y+i));
             if (color[2]>0)
@@ -437,26 +461,74 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
         }
     }
     
-    for (Point p : colorpoints)
-    {
-        change_Pixel(image2, p, 0, 255, 0);
-    }
-    
     outside_corner = Point(point_x, point_y);
     
-    //printf("outside corner is: %d, %d\n", point_x, point_y);
+    int count_feats = 0;
+    int feat_mod = 1;
+    
+    printf("inside corner: %d, %d\n", inside_corner.x, inside_corner.y);
+    printf("outside corner: %d, %d\n", outside_corner.x, outside_corner.y);
+    
+    float distance = sqrt((outside_corner.x-inside_corner.x)*(outside_corner.x-inside_corner.x)
+                            +(outside_corner.y-inside_corner.y)*(outside_corner.y-inside_corner.y));
+    float interval = distance/49;
+    int interval_rounded = floor(interval)+1;
+    
+    int index = 0;
+    
+    colorpoints.pop_back();
+    
+    for (Point p : colorpoints)
+    {
+        if (index == 0)
+        {
+            index++;
+        }
+        else
+        {
+            feat_mod++;
+            if (feat_mod % (interval_rounded-1) == 0 and count_feats < 2)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            else if (feat_mod % interval_rounded == 0 and count_feats > 2 and count_feats < 47)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            
+            else if (feat_mod % (interval_rounded-1) == 0 and count_feats < 49)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            //change_Pixel(image2, p, 0, 255, 0);
+            //printf("(%d, %d)\n", p.x, p.y);
+        }
+    }
     
     circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     //circle(image3, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image, inside_corner, 45, 5, 30);
     change_Pixel(image2, inside_corner, 45, 5, 30);
     change_Pixel(image3, inside_corner, 45, 5, 30);
     
     circle(image, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     //circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
+    change_Pixel(image, outside_corner, 45, 5, 30);
     change_Pixel(image2, outside_corner, 45, 5, 30);
     change_Pixel(image3, outside_corner, 45, 5, 30);
+    
+    printf ("Count feats = %d\n", count_feats);
     
 }
 
@@ -487,7 +559,7 @@ bool checkSlope(Mat image, int x, int y, int dir)
     
     for (int i = 0; i<20; i++)
     {
-        Vec3b color = image.at<Vec3b>(Point(x+10*dir-i, y+10));
+        Vec3b color = image.at<Vec3b>(Point(x+10*dir-dir*i, y+10));
         if (color[2]>0)
         {
             slope = i;

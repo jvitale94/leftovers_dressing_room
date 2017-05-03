@@ -1,0 +1,6 @@
+def main():
+    num = 6.991
+    for i in range(0,50):
+        print num*i
+
+main()
