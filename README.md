@@ -8,7 +8,7 @@ First, you must have OpenCV installed in order to run this program. Follow [this
 
 ## Files
 
-The find_lines.cpp file is the meat and potatoes of this project. This is the file that takes the input image, and finds feature points on the face, neckline, sleeves, and waistline. In order to run this file, build the project in XCode, and the run ./OpenCVInstalledGood <inputimage> <fileprefix>. This will save 4 files to the direcotry you are working in:
+The find_lines.cpp file is the meat and potatoes of this project. This is the file that takes the input image, and finds feature points on the face, neckline, sleeves, and waistline. In order to run this file, build the project in XCode, and the run ./OpenCVInstalledGood \<inputimage\> \<fileprefix\>. This will save 4 files to the direcotry you are working in:
 * fileprefix_lines.png - the decomposition of the input image into its lines/edges. This is the image that I do most of the work of finding features on. It also includes green lines that show the path of the tracker that I used to find feature points. The neckline, corners of the sleeve, and corners of the waistline are circled.        
 * fileprefix_circles.png - This is the input image with all the feature points circled.    
 * fileprefix_just_feature_points.png - This is the same as the circles image, but instead of each feature being circled, the actual feature points are colored to a specific color.
