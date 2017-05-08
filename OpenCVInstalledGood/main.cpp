@@ -32,23 +32,8 @@ void readme();
 //* @function main 
 int main( int argc, char** argv )
 {
-    //detect_feats(argc, argv);
-    //extract_shirt(argc, argv);
-    find_lines(argc, argv);
+    //find_lines(argc, argv);
     //find_lines_black(argc, argv);
-    //match_shirt(argc, argv);
-    //find_logo(argc, argv);
-    //find_circle(argc, argv);
-    //tone(argc, argv);
-    //face();
-    //morph(argc, argv);
-    //eandd(argc, argv);
-    //blur_stuff(argc, argv);
-    //fourier(argc, argv);
-    //draw_stuff();
-    //brighten(argc, argv);
-    //blend(argc, argv);
-    //load_image(argc, argv);
-    //find_features(argc, argv);
+    match_shirt(argc, argv);
 }
 

@@ -55,20 +55,14 @@ void match_shirt(int argc, char** argv )
     
     float a;
     float b;
-    int count=0;
     while (myfile >> a >> b)
     {
-        count++;
-        printf("%f, %f, %d \n", a, b, count);
         Point2f p (a,b);
         points_1.push_back(p);
     }
-    
-    count=0;
+
     while (myfile2 >> a >> b)
     {
-        count++;
-        printf("%f, %f, %d \n", a, b, count);
         Point2f p (a,b);
         points_2.push_back(p);
     }
