@@ -22,7 +22,7 @@ In main.cpp, there is just a list of calls to the the methods created in the thr
 
 ## Misc Info
 
-See above on how to run the program so it executes the find_lines() method. To run the match_shirts() method, uncomment it in main.cpp, build, then run ./OpenCVInstallGood <inputimage> black.JPG. This will save an image, blended.png, to your directory that shows the warped image blended with the input image.
+See above on how to run the program so it executes the find_lines() method. To run the match_shirts() method, uncomment it in main.cpp, build, then run ./OpenCVInstallGood \<inputimage\> black.JPG. This will save an image, blended.png, to your directory that shows the warped image blended with the input image.
 
 I have run this process on a test image, white.JPG, and have included all outputs. 
 
