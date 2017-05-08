@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -38,6 +39,7 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
 void change_Pixelb(Mat image, Point point, int r, int g, int b);
 void print_pixelsb(Mat image);
 bool checkSlopeb(Mat image, int x, int y, int dir);
+void count_pixelsb(Mat image, int r, int g, int b);
 
 
 void helpb()
@@ -101,6 +103,8 @@ int find_lines_black(int argc, char** argv)
     
     findBodyb(face_points, cdst, original, original_feature_points_only);
     
+    count_pixelsb(original_feature_points_only, 45, 5, 30);
+    
     std::string name = argv[2];
     
     std::string name1 = ""+name+"_lines.png";
@@ -163,6 +167,12 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
 {
     //find center
     Point center = face_points[0];
+
+    ofstream myfile;
+    myfile.open ("example.txt");
+    string xcoord = to_string(center.x);
+    string ycoord = to_string(center.y);
+    myfile << xcoord + " " + ycoord + "\n";
     
     change_Pixelb(image3, center, 45, 5, 30);
     
@@ -184,17 +194,21 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
             change_Pixelb(image2, Point(center.x, i), 45, 5, 30);
             change_Pixelb(image3, Point(center.x, i), 45, 5, 30);
             //circle(image3, Point(center.x,i), 20, Scalar(255, 0, 0), 2, 8, 0);
-            
             break;
         }
     }
+    
+    xcoord = to_string(tracker.x);
+    ycoord = to_string(tracker.y);
+    myfile << xcoord + " " + ycoord + "\n";
+    myfile.close();
     
     //left sleeve
     printf("Left Sleeve\n");
     find_sleeveb(image, image2, image3, tracker.x-650, tracker.y+650, 1, 1, 1, 0, 8);
     
     //right sleeve
-    printf("Right Sleeve\n");
+    printf("\n\nRight Sleeve\n");
     find_sleeveb(image, image2, image3, tracker.x+650, tracker.y+650, -1, 1, -1, 1, 12);
     
     //find waist line
@@ -296,40 +310,50 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
     
     
     
-    circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
-    change_Pixelb(image2, left_waist, 45, 5, 30);
-    change_Pixelb(image3, left_waist, 45, 5, 30);
-    //circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image2, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+//    change_Pixelb(image2, left_waist, 45, 5, 30);
+//    change_Pixelb(image3, left_waist, 45, 5, 30);
+//    //circle(image3, left_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     printf("%d, %d\n", left_waist.x, left_waist.y);
+//    
+//    circle(image3, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image2, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    change_Pixelb(image2, Point(2221, 3428), 45, 5, 30);
+//    change_Pixelb(image3, Point(2221, 3428), 45, 5, 30);
     
-    //circle(image3, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image2, Point(2221, 3428), 20, Scalar(255, 0, 0), 2, 8, 0);
-    change_Pixelb(image2, Point(2221, 3428), 45, 5, 30);
-    change_Pixelb(image3, Point(2221, 3428), 45, 5, 30);
     
-    //circle(image3, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image2, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
-    change_Pixelb(image2, Point(890, 3400), 45, 5, 30);
-    change_Pixelb(image3, Point(890, 3400), 45, 5, 30);
+    //This one is taken care of in the loop
+//    //circle(image3, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image2, Point(890, 3400), 20, Scalar(255, 0, 0), 2, 8, 0);
+//    change_Pixelb(image2, Point(890, 3400), 45, 5, 30);
+//    change_Pixelb(image3, Point(890, 3400), 45, 5, 30);
     
     int y = 3400;
     int point_count = 0;
     int point_mod = 0;
     
+    ofstream waistfile;
+    waistfile.open ("example.txt", std::ios::app);
+    
     for (int x = 890; x<=2221; x++)
     {
         if (point_mod % 20 == 0)
         {
+            //printf("%d\n", x);
             point_mod = 0;
             point_count++;
             
             circle(image2, Point(x, y), 20, Scalar(255, 0, 255), 2, 8, 0);
             change_Pixelb(image2, Point(x, y), 45, 5, 30);
             change_Pixelb(image3, Point(x, y), 45, 5, 30);
+            
+            string xcoord = to_string(x);
+            string ycoord = to_string(y);
+            waistfile << xcoord + " " + ycoord + "\n";
         }
         
         if (point_count == 1 and point_mod == 0)
@@ -590,6 +614,7 @@ void findBodyb(std::vector<Point> face_points, Mat image, Mat image2, Mat image3
     }
     
     printf("Points on waist line: %d\n", point_count);
+    waistfile.close();
 }
 
 void blackOutb(std::vector<Point> face_points, Mat image)
@@ -664,6 +689,8 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     Point inside_corner;
     Point outside_corner;
     
+    
+    
     //find inside corner of sleeve
     while (slope-threshold<0)
     {
@@ -698,6 +725,9 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     int count = 0;
     int feat_count = 0;
     
+    ofstream sleavefile;
+    sleavefile.open ("example.txt", std::ios::app);
+    
     //draw green points of sleeve
     for (Point p : colorpoints)
     {
@@ -705,6 +735,9 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
         {
             feat_count++;
             change_Pixelb(image3, p, 45, 5, 30);
+            string xcoord = to_string(p.x);
+            string ycoord = to_string(p.y);
+            sleavefile << xcoord + " " + ycoord + "\n";
             circle(image2, p, 20, Scalar(255, 0, 255), 2, 8, 0);
             
         }
@@ -756,12 +789,25 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
         }
     }
     
+    colorpoints.pop_back();
+    
+    count = 1;
+    int pointcount = 0;
+    
+    //printf("\nSize: %lu\n\n", colorpoints.size());
+    
     for (Point p : colorpoints)
     {
+        pointcount++;
+        //printf("Point Count: %d\n", pointcount);
         if (count%featsmod==0)
         {
+            count = 0;
             feat_count++;
             change_Pixelb(image3, p, 45, 5, 30);
+            string xcoord = to_string(p.x);
+            string ycoord = to_string(p.y);
+            sleavefile << xcoord + " " + ycoord + "\n";
             circle(image2, p, 20, Scalar(255, 0, 255), 2, 8, 0);
         }
         count++;
@@ -769,6 +815,14 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     }
     
     outside_corner = Point(point_x, point_y);
+    
+    printf("inside corner is (%d, %d)\n", inside_corner.x, inside_corner.y);
+    printf("outside corner is (%d, %d)\n", outside_corner.x, outside_corner.y);
+    
+    for (Point p : colorpoints)
+    {
+        //printf("point is (%d, %d)\n", p.x, p.y);
+    }
     
     circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -781,6 +835,16 @@ void find_sleeveb(Mat image, Mat image2, Mat image3, int point_x, int point_y, i
     //circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixelb(image2, outside_corner, 45, 5, 30);
     change_Pixelb(image3, outside_corner, 45, 5, 30);
+    
+    string xcoord = to_string(inside_corner.x);
+    string ycoord = to_string(inside_corner.y);
+    sleavefile << xcoord + " " + ycoord + "\n";
+    
+    xcoord = to_string(outside_corner.x);
+    ycoord = to_string(outside_corner.y);
+    sleavefile << xcoord + " " + ycoord + "\n";
+    
+    sleavefile.close();
     
     printf("feat count is %d\n", feat_count);
     
@@ -830,6 +894,25 @@ bool checkSlopeb(Mat image, int x, int y, int dir)
     if (slope==0)
         return true;
     return false;
+}
+
+void count_pixelsb(Mat image, int r, int g, int b)
+{
+    int count = 0;
+    
+    for (int i = 0; i<image.rows; i++)
+    {
+        for (int j = 0; j<image.cols; j++)
+        {
+            Vec3b color = image.at<Vec3b>(Point(i,j));
+            if (color[2]==r and color[1]==g and color[0]==b)
+            {
+                count ++;
+                //printf("Pixel in image at point (%d, %d) is (%d, %d, %d)\n", i, j, color[2], color[1], color[0]);
+            }
+        }
+    }
+    printf("There are %d pixels with the given RGB vals\n", count);
 }
 
 

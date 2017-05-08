@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include "opencv2/core.hpp"
 #include "opencv2/features2d.hpp"
 #include "opencv2/calib3d.hpp"
@@ -43,20 +44,50 @@ void match_shirt(int argc, char** argv )
     std::vector<Point2f> points_1;
     std::vector<Point2f> points_2;
     
-    points_1 = find_pixels_vals(image1, 45, 5, 30);
-    points_2 = find_pixels_vals(image2, 45, 5, 30);
+//    points_1 = find_pixels_vals(image1, 45, 5, 30);
+//    points_2 = find_pixels_vals(image2, 45, 5, 30);
     
-    Mat h = findHomography(points_1, points_2);
+    std::fstream myfile("points_white.txt", std::ios_base::in);
+    std::fstream myfile2("points_black.txt", std::ios_base::in);
+    
+    float a;
+    float b;
+    int count=0;
+    while (myfile >> a >> b)
+    {
+        count++;
+        printf("%f, %f, %d \n", a, b, count);
+        Point2f p (a,b);
+        points_1.push_back(p);
+    }
+    
+    count=0;
+    while (myfile2 >> a >> b)
+    {
+        count++;
+        printf("%f, %f, %d \n", a, b, count);
+        Point2f p (a,b);
+        points_2.push_back(p);
+    }
+
+    
+    Mat h = findHomography(points_2, points_1);
     
     warpPerspective(image2, image3, h, Size(image1.cols, image1.rows));
     
 //    resize(image3, image3, Size(image3.cols/4, image3.rows/4));
 //    imshow("image3", image3);
 //    waitKey();
+    
+    printf("Image 1 size: %d, %d", image1.size().height, image1.size().width);
+    printf("Image 3 size: %d, %d", image3.size().height, image3.size().width);
+    
+    printf("Image 1 depth: %d", image1.depth());
+    printf("Image 3 depth: %d", image3.depth());
 
     addWeighted(image1, .5, image3, .5, 0.0, dst);
     
-    imwrite("testimages/blended.png", dst);
+    imwrite("blended.png", dst);
     
     //waitKey(0);
 }

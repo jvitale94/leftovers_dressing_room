@@ -13,6 +13,7 @@
 #include "opencv2/objdetect.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <math.h>
 
@@ -29,6 +30,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
 void change_Pixel(Mat image, Point point, int r, int g, int b);
 void print_pixels(Mat image);
 bool checkSlope(Mat image, int x, int y, int dir);
+void count_pixels(Mat image, int r, int g, int b);
 
 
 void help()
@@ -91,6 +93,8 @@ int find_lines(int argc, char** argv)
     //iterate through pixels and find the right line below. scan to left and right to find shoulders
     
     findBody(face_points, cdst, original, original_feature_points_only);
+    
+    count_pixels(original_feature_points_only, 45, 5, 30);
     
     std::string name = argv[2];
     
@@ -159,6 +163,12 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     //center of face is feature point
     change_Pixel(image3, center, 45, 5, 30);
     change_Pixel(image2, center, 45, 5, 30);
+    
+    ofstream myfile;
+    myfile.open ("points_white.txt");
+    string xcoord = to_string(center.x);
+    string ycoord = to_string(center.y);
+    myfile << xcoord + " " + ycoord + "\n";
 
     
     int r = image.rows;
@@ -184,6 +194,11 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
             break;
         }
     }
+    
+    xcoord = to_string(tracker.x);
+    ycoord = to_string(tracker.y);
+    myfile << xcoord + " " + ycoord + "\n";
+    myfile.close();
     
     //left sleeve
     printf("Left Sleeve\n");
@@ -218,6 +233,9 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     int point_y = center_waist.y;
     
     int count_feats = 0;
+    std::vector<Point> rightpoints;
+    std::vector<Point> leftpoints;
+    std::vector<Point> orderedpoints;
     
     //right waist
     while (slope-threshold<0)
@@ -230,6 +248,7 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
             {
                 point_x = point_x + 1;
                 point_y = point_y+i;
+                rightpoints.push_back(Point(point_x,point_y));
                 slope = i;
                 color[0] = 0;
                 color[1] = 255;
@@ -254,7 +273,6 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
     //left waist
     while (slope-threshold<0)
     {
-        
         //keeps looking for points consistent with already found slope
         for (int i = -5; i<5; i++)
         {
@@ -263,6 +281,7 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
             {
                 point_x = point_x - 1;
                 point_y = point_y+i;
+                leftpoints.push_back(Point(point_x, point_y));
                 slope = i;
                 color[0] = 0;
                 color[1] = 255;
@@ -278,14 +297,89 @@ void findBody(std::vector<Point> face_points, Mat image, Mat image2, Mat image3)
         }
     }
     
+    for (vector<Point>::reverse_iterator i = leftpoints.rbegin();
+         i != leftpoints.rend(); ++i ) {
+        orderedpoints.push_back(Point(i->x, i->y));
+    }
+    
+    orderedpoints.push_back(center_waist);
+    
+    for (Point p: rightpoints)
+    {
+        orderedpoints.push_back(p);
+    }
+    
     left_waist = Point(point_x, point_y);
     
-    circle(image, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
-    circle(image2, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
-    change_Pixel(image, center_waist, 45, 5, 30);
-    change_Pixel(image2, center_waist, 45, 5, 30);
-    change_Pixel(image3, center_waist, 45, 5, 30);
-    //circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+    int feat_mod = 1;
+    
+    float distance = sqrt((right_waist.x-left_waist.x)*(right_waist.x-left_waist.x)
+                          +(right_waist.y-left_waist.y)*(right_waist.y-left_waist.y));
+    float interval = distance/67;
+    int interval_rounded = floor(interval)+1;
+    
+    int index = 0;
+    
+    orderedpoints.pop_back();
+    
+    ofstream waistfile;
+    waistfile.open ("points_white.txt", std::ios::app);
+    
+    for (Point p : orderedpoints)
+    {
+        if (index == 0)
+        {
+            index++;
+        }
+        else
+        {
+            feat_mod++;
+            if (feat_mod % (interval_rounded-1) == 0 and count_feats < 2)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                string xcoord = to_string(p.x);
+                string ycoord = to_string(p.y);
+                waistfile << xcoord + " " + ycoord + "\n";
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            else if (feat_mod % interval_rounded == 0 and count_feats > 2 and count_feats < 65)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                string xcoord = to_string(p.x);
+                string ycoord = to_string(p.y);
+                waistfile << xcoord + " " + ycoord + "\n";
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            
+            else if (feat_mod % (interval_rounded-1) == 0 and count_feats < 67)
+            {
+                feat_mod = 0;
+                count_feats++;
+                change_Pixel(image3, p, 45, 5, 30);
+                string xcoord = to_string(p.x);
+                string ycoord = to_string(p.y);
+                waistfile << xcoord + " " + ycoord + "\n";
+                circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
+            }
+            //change_Pixel(image2, p, 0, 255, 0);
+            //printf("(%d, %d)\n", p.x, p.y);
+        }
+    }
+    
+    waistfile.close();
+    
+    printf("%d\n", count_feats);
+    
+//    circle(image, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+//    circle(image2, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
+//    change_Pixel(image, center_waist, 45, 5, 30);
+//    change_Pixel(image2, center_waist, 45, 5, 30);
+//    change_Pixel(image3, center_waist, 45, 5, 30);
+//    circle(image3, center_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     
     circle(image, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, right_waist, 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -312,7 +406,7 @@ void blackOut(std::vector<Point> face_points, Mat image)
     
     for (int x = p1.x; x<p3.x; x++)
     {
-        for (int y = p1.y; y<p2.y; y++)
+        for (int y = p1.y; y<p2.y+100; y++)
         {
             Vec3b color = image.at<Vec3b>(Point(x,y));
             color[0] = 0;
@@ -478,6 +572,11 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     
     colorpoints.pop_back();
     
+    ofstream sleavefile;
+    sleavefile.open ("points_white.txt", std::ios::app);
+    
+    std::vector<Point> pointstoadd;
+    
     for (Point p : colorpoints)
     {
         if (index == 0)
@@ -492,6 +591,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
                 feat_mod = 0;
                 count_feats++;
                 change_Pixel(image3, p, 45, 5, 30);
+                pointstoadd.push_back(p);
                 circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
             }
             else if (feat_mod % interval_rounded == 0 and count_feats > 2 and count_feats < 47)
@@ -499,6 +599,7 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
                 feat_mod = 0;
                 count_feats++;
                 change_Pixel(image3, p, 45, 5, 30);
+                pointstoadd.push_back(p);
                 circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
             }
             
@@ -507,12 +608,22 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
                 feat_mod = 0;
                 count_feats++;
                 change_Pixel(image3, p, 45, 5, 30);
+                pointstoadd.push_back(p);
                 circle(image2, p, 20, Scalar(255, 0, 5*count_feats), 2, 8, 0);
             }
             //change_Pixel(image2, p, 0, 255, 0);
             //printf("(%d, %d)\n", p.x, p.y);
         }
     }
+    
+    for (vector<Point>::reverse_iterator i = pointstoadd.rbegin();
+         i != pointstoadd.rend(); ++i ) {
+        string xcoord = to_string(i->x);
+        string ycoord = to_string(i->y);
+        sleavefile << xcoord + " " + ycoord + "\n";
+    }
+    
+    
     
     circle(image, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, inside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
@@ -521,12 +632,22 @@ void find_sleeve(Mat image, Mat image2, Mat image3, int point_x, int point_y, in
     change_Pixel(image2, inside_corner, 45, 5, 30);
     change_Pixel(image3, inside_corner, 45, 5, 30);
     
+    string xcoord = to_string(inside_corner.x);
+    string ycoord = to_string(inside_corner.y);
+    sleavefile << xcoord + " " + ycoord + "\n";
+    
     circle(image, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     circle(image2, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     //circle(image3, outside_corner, 20, Scalar(255, 0, 0), 2, 8, 0);
     change_Pixel(image, outside_corner, 45, 5, 30);
     change_Pixel(image2, outside_corner, 45, 5, 30);
     change_Pixel(image3, outside_corner, 45, 5, 30);
+    
+    xcoord = to_string(outside_corner.x);
+    ycoord = to_string(outside_corner.y);
+    sleavefile << xcoord + " " + ycoord + "\n";
+    
+    sleavefile.close();
     
     printf ("Count feats = %d\n", count_feats);
     
@@ -576,6 +697,25 @@ bool checkSlope(Mat image, int x, int y, int dir)
     if (slope==0)
         return true;
     return false;
+}
+
+void count_pixels(Mat image, int r, int g, int b)
+{
+    int count = 0;
+    
+    for (int i = 0; i<image.rows; i++)
+    {
+        for (int j = 0; j<image.cols; j++)
+        {
+            Vec3b color = image.at<Vec3b>(Point(i,j));
+            if (color[2]==r and color[1]==g and color[0]==b)
+            {
+                count ++;
+                //printf("Pixel in image at point (%d, %d) is (%d, %d, %d)\n", i, j, color[2], color[1], color[0]);
+            }
+        }
+    }
+    printf("There are %d pixels with the given RGB vals\n", count);
 }
 
 
